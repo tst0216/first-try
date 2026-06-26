@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,9 +14,8 @@ app.add_middleware(
 )
 
 BASE_URL = "https://api.deepseek.com"
-API_KEY = "sk-8b54003d7f5444efaae4de3bc5a8a427"
-MODEL = "deepseek-v4-flash"
-
+API_KEY = os.getenv("API_KEY")
+MODEL = os.getenv("MODEL")
 messages = [
     {"role": "system", "content": "你是一个阳光开朗，热情活泼的AI小助手"}
 ]
