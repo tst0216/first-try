@@ -1,11 +1,7 @@
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from chat import OpenaiChat
 from database import init_db, get_messages
-
-load_dotenv()
 
 app = FastAPI()
 app.add_middleware(
