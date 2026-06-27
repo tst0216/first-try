@@ -7,6 +7,7 @@
 ### 1. 启动后端
 
 #### 1.main.py
+```
 启动服务（uvicorn）
         ↓
 加载环境变量（load_dotenv）
@@ -34,9 +35,11 @@
 调用 get_messages()，去掉第一条系统消息
         ↓
 返回 {"messages": 消息列表}
+```
 
 #### 2.database.py
 ##### 1.init_db()
+```
 连接数据库 chat.db
         ↓
 执行 CREATE TABLE IF NOT EXISTS messages
@@ -48,7 +51,9 @@
 执行 INSERT INTO messages (role, content) VALUES (?, ?)
         ↓
 提交并关闭连接
+```
 ##### 3.get_messages()
+```
 连接数据库 chat.db
         ↓
 执行 SELECT role, content FROM messages
@@ -60,8 +65,10 @@
 关闭连接
         ↓
 返回列表
+```
 
 #### 3.chat.py
+```
 用户消息进来
         ↓
 save_message("user", user_msg)      
@@ -75,8 +82,10 @@ save_message("user", user_msg)
 save_message("assistant", reply)    
         ↓
 返回回复给 main.py
+```
 
 ### 2. 前端
+```
 页面加载
     ↓
 useEffect → 请求 /history → 拿到历史消息 → 显示在页面上
@@ -94,3 +103,4 @@ useEffect → 请求 /history → 拿到历史消息 → 显示在页面上
 AI 消息显示在页面上
     ↓
 清空输入框
+```
