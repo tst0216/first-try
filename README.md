@@ -45,7 +45,9 @@
 执行 CREATE TABLE IF NOT EXISTS messages
         ↓
 提交并关闭连接
+```
 ##### 2.save_message(role, content)
+```
 连接数据库 chat.db
         ↓
 执行 INSERT INTO messages (role, content) VALUES (?, ?)
