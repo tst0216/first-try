@@ -11,30 +11,44 @@ class OpenaiChat:
         self.api_key = os.getenv("API_KEY")
         self.model = os.getenv("MODEL")
 
-    def chat(self, user_msg: str,system_prompt: str = None):
-        save_message("user", user_msg)
-
-        messages = get_messages()
-
-        if system_prompt:
-            messages.insert(0, {"role": "system", "content": system_prompt})
-
-        url = f"{self.base_url}/chat/completions"
-        headers = {
+    def parse_reply(self, data):
+        return data["choices"][0]["message"]["content"]
+    
+    def build_headers(self):
+        return {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
-        payload = {
+
+    def build_payload(self, messages):
+        return {
             "model": self.model,
             "messages": messages,
             "temperature": 0.5,
             "max_tokens": 256,
         }
+    
+    def send_request(self, messages):
+        url = f"{self.base_url}/chat/completions"
+        headers = self.build_headers()
+        payload = self.build_payload(messages)
+
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
-        data = response.json()
-        reply = data["choices"][0]["message"]["content"]
+        return response.json()
 
-        save_message("assistant", reply)
+    def chat(self, conversation_id: int, user_msg: str, system_prompt: str = None):
+        save_message(conversation_id, "user", user_msg)
+
+        messages = get_messages(conversation_id)
+
+        if system_prompt:
+            messages.insert(0, {"role": "system", "content": system_prompt})
+
+        
+        data = self.send_request(messages)
+        reply = self.parse_reply(data)
+
+        save_message(conversation_id, "assistant", reply)
 
         return reply
