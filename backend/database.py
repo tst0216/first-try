@@ -105,3 +105,20 @@ def update_conversation_title(conversation_id, title):
     )
     conn.commit()
     conn.close()
+
+def delete_conversation(conversation_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM messages WHERE conversation_id = ?",
+        (conversation_id,)
+    )
+
+    cursor.execute(
+        "DELETE FROM conversations WHERE id = ?",
+        (conversation_id,)
+    )
+
+    conn.commit()
+    conn.close()

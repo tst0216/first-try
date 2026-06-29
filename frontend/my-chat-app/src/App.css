@@ -2,19 +2,82 @@ body {
   margin: 0;
   background:white;
   min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-layout {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  gap: 30px;
+  padding: 20px;
+}
+
+.sidebar {
+  width: 250px;
+  height: calc(100vh - 40px);
+  background: #c2d9f1;
+  padding: 16px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .chat-page {
-  width: 800px;
-  height: 600px;
+  flex: 1;
+  height: calc(100vh - 40px);
   background: #afd4f7;
   padding: 30px;
-  border-radius: 16px;
+  border-radius: 20px;
   display: flex;
   flex-direction: column; 
+  box-sizing: border-box;
+}
+
+.new-chat-button {
+  height: 50px;
+  border-radius: 16px;
+  background: #a1baf0;
+  color: black;
+  cursor: pointer;
+}
+
+.conversation-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.conversation-title-button {
+  flex: 1;
+  height: 36px;
+  border-radius: 16px;
+  background: white;
+  color: #172033;
+  text-align: left;
+  padding: 0 12px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.delete-conversation-button {
+  width: 54px;
+  height: 36px;
+  border-radius: 16px;
+  background: #f5b5b5;
+  color: #172033;
+  cursor: pointer;
 }
 
 .title{
@@ -71,6 +134,7 @@ body {
 }
 
 .chat-input{
+  height: 46px;
   padding: 0 20px;
   font-size: 16px;
   flex: 1;
@@ -79,8 +143,8 @@ body {
 }
 
 .send-button{
-  width: 80px;
-  height: 40px;
+  width: 100px;
+  height: 45px;
   background: #f6f5b0;
   color: black;
   border-radius: 30px

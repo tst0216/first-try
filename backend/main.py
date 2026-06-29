@@ -7,6 +7,7 @@ from database import (
     create_conversation, 
     get_conversations,
     update_conversation_title,
+    delete_conversation,
 )
 
 app = FastAPI()
@@ -45,3 +46,8 @@ def conversations():
 def update_title(conversation_id: int, title: str):
     update_conversation_title(conversation_id, title)
     return {"id": conversation_id, "title": title}
+
+@app.get("/delete_conversation")
+def delete_old_conversation(conversation_id: int):
+    delete_conversation(conversation_id)
+    return {"id": conversation_id}
