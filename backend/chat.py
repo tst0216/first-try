@@ -1,13 +1,13 @@
 import os
 import requests
+
 from dotenv import load_dotenv
-from database import save_message, get_messages
 
 load_dotenv()
 
 class OpenaiChat:
     def __init__(self):
-        self.base_url = "https://api.deepseek.com"
+        self.base_url = os.getenv("BASE_URL")
         self.api_key = os.getenv("API_KEY")
         self.model = os.getenv("MODEL")
 
@@ -36,19 +36,7 @@ class OpenaiChat:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
         return response.json()
-
-    def chat(self, conversation_id: int, user_msg: str, system_prompt: str = None):
-        save_message(conversation_id, "user", user_msg)
-
-        messages = get_messages(conversation_id)
-
-        if system_prompt:
-            messages.insert(0, {"role": "system", "content": system_prompt})
-
-        
+    
+    def chat_with_messages(self, messages):
         data = self.send_request(messages)
-        reply = self.parse_reply(data)
-
-        save_message(conversation_id, "assistant", reply)
-
-        return reply
+        return self.parse_reply(data)

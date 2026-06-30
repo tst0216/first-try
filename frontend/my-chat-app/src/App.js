@@ -6,6 +6,8 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -80,14 +82,38 @@ const App = () => {
     setConversations(newConversations);
   };
 
-  const handleClick = async () => {
-    const userMessage = {
-      role: "user",
-      content: text,
-    };
+  const addImageFile = (file) => {
+    setImageFiles((oldFiles) => [...oldFiles, file]);
+    setImagePreviews((oldPreviews) => [
+      ...oldPreviews,
+      URL.createObjectURL(file),
+    ]);
+  };
 
-    setMessages((oldMessages) => [...oldMessages, userMessage]);
+  const handlePaste = (e) => {
+    const items = e.clipboardData.items;
 
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        addImageFile(file);
+      }
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+
+    const files = e.dataTransfer.files;
+
+    for (const file of files) {
+      if (file.type.startsWith("image/")) {
+        addImageFile(file);
+      }
+    }
+  };
+
+const handleClick = async () => {
   const currentConversation = conversations.find(
     (conversation) => conversation.id === currentConversationId
   );
@@ -108,19 +134,37 @@ const App = () => {
   );
 }
 
-    const response = await fetch(
-      `http://127.0.0.1:8000/chat?conversation_id=${currentConversationId}&msg=${encodeURIComponent(text)}`
-    );
+    const formData = new FormData();
+
+    formData.append("conversation_id", currentConversationId);
+    formData.append("msg", text);
+
+    imageFiles.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    const response = await fetch("http://127.0.0.1:8000/chat_with_images", {
+      method: "POST",
+      body: formData,
+    });
 
     const data = await response.json();
+
+    const userMessage = {
+      role: "user",
+      content: text || "发送了图片",
+      images: data.images,
+    };
 
     const aiMessage = {
       role: "assistant",
       content: data.reply,
     };
 
-    setMessages((oldMessages) => [...oldMessages, aiMessage]);
+    setMessages((oldMessages) => [...oldMessages,  userMessage, aiMessage]);
     setText("");
+    setImageFiles([]);
+    setImagePreviews([]);
   };
 
   return (
@@ -151,22 +195,53 @@ const App = () => {
       </div>
     </div>
 
-    <div className="chat-page">
+    <div 
+      className="chat-page"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
+    >
+
       <h1 className="title">你好呀，我是 AI 小助手 (´∩｡• ᵕ •｡∩`)</h1>
 
       <div className="message-list">
         {messages.map((msg, index) => (
           <div className={`message-row ${msg.role}`} key={index}>
-            <div className="message-bubble">{msg.content}</div>
+            <div className="message-bubble">
+              <div>{msg.content}</div>
+              {msg.images && msg.images.map((imageUrl, imageIndex) => (
+                <a
+                  href={`http://127.0.0.1:8000${imageUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  key={imageUrl}
+                >
+                  图片 {imageIndex + 1}
+                </a>
+              ))}
+            </div>
           </div>
         ))}
       </div>
+
+      {imagePreviews.length > 0 && (
+        <div className="image-preview-list">
+          {imagePreviews.map((preview, index) => (
+            <img
+              className="image-preview"
+              src={preview}
+              alt={`粘贴的图片 ${index + 1}`}
+              key={preview}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="input-row">
         <input
           className="chat-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onPaste={handlePaste}
         />
 
         <button className="send-button" onClick={handleClick}>
