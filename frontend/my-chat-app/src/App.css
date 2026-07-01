@@ -164,3 +164,9 @@ body {
   border-radius: 10px;
   border: 1px solid #b6cfef;
 }
+
+.message-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+}

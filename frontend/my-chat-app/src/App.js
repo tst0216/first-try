@@ -8,6 +8,7 @@ const App = () => {
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -114,6 +115,7 @@ const App = () => {
   };
 
 const handleClick = async () => {
+  setIsWaiting(true);
   const currentConversation = conversations.find(
     (conversation) => conversation.id === currentConversationId
   );
@@ -165,6 +167,7 @@ const handleClick = async () => {
     setText("");
     setImageFiles([]);
     setImagePreviews([]);
+    setIsWaiting(false);
   };
 
   return (
@@ -215,7 +218,11 @@ const handleClick = async () => {
                   rel="noreferrer"
                   key={imageUrl}
                 >
-                  图片 {imageIndex + 1}
+                  <img
+                    className="message-image"
+                    src={`http://127.0.0.1:8000${imageUrl}`}
+                    alt={`聊天图片 ${imageIndex + 1}`}
+                  />
                 </a>
               ))}
             </div>
@@ -245,7 +252,7 @@ const handleClick = async () => {
         />
 
         <button className="send-button" onClick={handleClick}>
-          发送
+          {isWaiting ? "回复中..." : "发送"}
         </button>
       </div>
     </div>
