@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "./App.css";
 
 const API_BASE_URL = "http://127.0.0.1:8000";
@@ -11,6 +13,8 @@ const App = () => {
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isWaiting, setIsWaiting] = useState(false);
+
+  const messageListRef = useRef(null);
 
   useEffect(() => {
     const loadConversations = async () => {
@@ -114,6 +118,19 @@ const App = () => {
         addImageFile(file);
       }
     }
+  };
+
+  const scrollToBottom = () => {
+    const messageList = messageListRef.current;
+
+    if (!messageList) {
+      return;
+    }
+
+    messageList.scrollTo({
+      top: messageList.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   const handleClick = async () => {
@@ -225,11 +242,13 @@ const App = () => {
 
       <h1 className="title">你好呀，我是 AI 小助手 (´∩｡• ᵕ •｡∩`)</h1>
 
-      <div className="message-list">
+      <div className="message-list" ref={messageListRef}>
         {messages.map((msg, index) => (
           <div className={`message-row ${msg.role}`} key={index}>
             <div className="message-bubble">
-              <div>{msg.content}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {msg.content}
+              </ReactMarkdown>
               {msg.images && msg.images.map((imageUrl, imageIndex) => (
                 <a
                   href={`${API_BASE_URL}${imageUrl}`}
@@ -249,6 +268,13 @@ const App = () => {
         ))}
       </div>
 
+      <button
+        className="scroll-bottom-button"
+        onClick={scrollToBottom}
+      >
+        ↓
+      </button>
+
       {imagePreviews.length > 0 && (
         <div className="image-preview-list">
           {imagePreviews.map((preview, index) => (
@@ -263,11 +289,12 @@ const App = () => {
       )}
 
       <div className="input-row">
-        <input
+        <textarea
           className="chat-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
           onPaste={handlePaste}
+          rows={2}
         />
 
         <button 

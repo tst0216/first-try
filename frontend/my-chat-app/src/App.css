@@ -33,6 +33,7 @@ body {
   display: flex;
   flex-direction: column; 
   box-sizing: border-box;
+  position: relative;
 }
 
 .new-chat-button {
@@ -134,20 +135,26 @@ body {
 }
 
 .chat-input{
-  height: 46px;
-  padding: 0 20px;
+  height: 64px;
+  max-height: 64px;
+  padding: 10px 20px;
   font-size: 16px;
   flex: 1;
   border: 1px solid black;
   border-radius: 30px;
+  overflow-y: auto;
+  resize: none;
+  line-height: 22px;
+  box-sizing: border-box;
 }
 
 .send-button{
   width: 100px;
-  height: 45px;
+  height: 50px;
+  flex-shrink: 0;
   background: #f6f5b0;
   color: black;
-  border-radius: 30px
+  border-radius: 30px;
 }
 
 .image-preview-list {
@@ -169,4 +176,27 @@ body {
   width: 120px;
   height: 120px;
   object-fit: cover;
+}
+
+.message-bubble p {
+  margin: 0 0 8px;
+}
+
+.message-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.scroll-bottom-button {
+  position: absolute;
+  right: 100px;
+  bottom: 150px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid black;
+  background: rgb(245, 189, 189);
+  color: black;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
 }
