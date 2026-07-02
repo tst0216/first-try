@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 const App = () => {
   const [text, setText] = useState("");
   const [messages, setMessages] = useState([]);
@@ -12,7 +14,7 @@ const App = () => {
 
   useEffect(() => {
     const loadConversations = async () => {
-    const response = await fetch("http://127.0.0.1:8000/conversations");
+    const response = await fetch(`${API_BASE_URL}/conversations`);
     const data = await response.json();
 
     setConversations(data.conversations);
@@ -23,7 +25,7 @@ const App = () => {
       setCurrentConversationId(firstConversation.id);
 
       const historyResponse = await fetch(
-        `http://127.0.0.1:8000/history?conversation_id=${firstConversation.id}`
+        `${API_BASE_URL}/history?conversation_id=${firstConversation.id}`
       );
       const historyData = await historyResponse.json();
 
@@ -31,7 +33,7 @@ const App = () => {
     }
 
     else {
-      const createResponse = await fetch("http://127.0.0.1:8000/create_conversation");
+      const createResponse = await fetch(`${API_BASE_URL}/create_conversation`);
       const createData = await createResponse.json();
 
       const newConversation = {
@@ -50,14 +52,14 @@ const App = () => {
   const handleSelectConversation = async (conversationId) => {
   setCurrentConversationId(conversationId);
   const response = await fetch(
-    `http://127.0.0.1:8000/history?conversation_id=${conversationId}`
+    `${API_BASE_URL}/history?conversation_id=${conversationId}`
   );
   const data = await response.json();
   setMessages(data.messages);
   };
 
   const handleCreateConversation = async () => {
-    const response = await fetch("http://127.0.0.1:8000/create_conversation");
+    const response = await fetch(`${API_BASE_URL}/create_conversation`);
     const data = await response.json();
 
     const newConversation = {
@@ -73,7 +75,7 @@ const App = () => {
 
   const handleDeleteConversation = async (conversationId) => {
     await fetch(
-      `http://127.0.0.1:8000/delete_conversation?conversation_id=${conversationId}`
+      `${API_BASE_URL}/delete_conversation?conversation_id=${conversationId}`
     );
 
     const newConversations = conversations.filter(
@@ -114,60 +116,77 @@ const App = () => {
     }
   };
 
-const handleClick = async () => {
-  setIsWaiting(true);
-  const currentConversation = conversations.find(
-    (conversation) => conversation.id === currentConversationId
-  );
+  const handleClick = async () => {
+    const isEmptyMessage = text.trim() === "" && imageFiles.length === 0;
 
-  if (currentConversation && currentConversation.title === "新话题") {
-    const newTitle = text;
+    if (isEmptyMessage) {
+      return;
+    }
 
-    await fetch(
-      `http://127.0.0.1:8000/update_conversation_title?conversation_id=${currentConversationId}&title=${encodeURIComponent(newTitle)}`
-    );
+    setIsWaiting(true);
 
-    setConversations((oldConversations) =>
-    oldConversations.map((conversation) =>
-      conversation.id === currentConversationId
-        ? { ...conversation, title: newTitle }
-        : conversation
-    )
-  );
-}
+    try {
+      const currentConversation = conversations.find(
+        (conversation) => conversation.id === currentConversationId
+      );
 
-    const formData = new FormData();
+      if (currentConversation && currentConversation.title === "新话题") {
+        const newTitle = text;
 
-    formData.append("conversation_id", currentConversationId);
-    formData.append("msg", text);
+        await fetch(
+          `${API_BASE_URL}/update_conversation_title?conversation_id=${currentConversationId}&title=${encodeURIComponent(newTitle)}`
+        );
 
-    imageFiles.forEach((file) => {
-      formData.append("images", file);
-    });
+        setConversations((oldConversations) =>
+          oldConversations.map((conversation) =>
+            conversation.id === currentConversationId
+              ? { ...conversation, title: newTitle }
+              : conversation
+          )
+        );
+      }
 
-    const response = await fetch("http://127.0.0.1:8000/chat_with_images", {
-      method: "POST",
-      body: formData,
-    });
+      const formData = new FormData();
 
-    const data = await response.json();
+      formData.append("conversation_id", currentConversationId);
+      formData.append("msg", text);
 
-    const userMessage = {
-      role: "user",
-      content: text || "发送了图片",
-      images: data.images,
-    };
+      imageFiles.forEach((file) => {
+        formData.append("images", file);
+      });
 
-    const aiMessage = {
-      role: "assistant",
-      content: data.reply,
-    };
+      const response = await fetch(`${API_BASE_URL}/chat_with_images`, {
+        method: "POST",
+        body: formData,
+      });
 
-    setMessages((oldMessages) => [...oldMessages,  userMessage, aiMessage]);
-    setText("");
-    setImageFiles([]);
-    setImagePreviews([]);
-    setIsWaiting(false);
+      if (!response.ok) {
+        throw new Error("请求失败");
+      }
+
+      const data = await response.json();
+
+      const userMessage = {
+        role: "user",
+        content: text || "发送了图片",
+        images: data.images,
+      };
+
+      const aiMessage = {
+        role: "assistant",
+        content: data.reply,
+      };
+
+      setMessages((oldMessages) => [...oldMessages, userMessage, aiMessage]);
+      setText("");
+      setImageFiles([]);
+      setImagePreviews([]);
+    } catch (error) {
+      console.error(error);
+      alert("发送失败，请稍后再试");
+    } finally {
+      setIsWaiting(false);
+    }
   };
 
   return (
@@ -213,14 +232,14 @@ const handleClick = async () => {
               <div>{msg.content}</div>
               {msg.images && msg.images.map((imageUrl, imageIndex) => (
                 <a
-                  href={`http://127.0.0.1:8000${imageUrl}`}
+                  href={`${API_BASE_URL}${imageUrl}`}
                   target="_blank"
                   rel="noreferrer"
                   key={imageUrl}
                 >
                   <img
                     className="message-image"
-                    src={`http://127.0.0.1:8000${imageUrl}`}
+                    src={`${API_BASE_URL}${imageUrl}`}
                     alt={`聊天图片 ${imageIndex + 1}`}
                   />
                 </a>
@@ -251,7 +270,11 @@ const handleClick = async () => {
           onPaste={handlePaste}
         />
 
-        <button className="send-button" onClick={handleClick}>
+        <button 
+          className="send-button"
+          onClick={handleClick}
+          disabled={isWaiting}
+        >
           {isWaiting ? "回复中..." : "发送"}
         </button>
       </div>
